@@ -15,6 +15,14 @@ var flags_captured := 0
 var scheme: Scheme = Scheme.WASD
 ## Definido pelo Main no _ready; usado pelo minimapa do HUD.
 var arena := Rect2()
+## Rastreio das veias de energia: guardiões "sentem" o jogador sobre elas.
+var _vein_frame := -100
+
+func mark_player_on_vein() -> void:
+	_vein_frame = int(Engine.get_physics_frames())
+
+func is_player_on_vein() -> bool:
+	return int(Engine.get_physics_frames()) - _vein_frame <= 2
 
 func reset() -> void:
 	state = GState.PLAYING

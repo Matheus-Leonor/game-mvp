@@ -15,6 +15,11 @@ const ENEMY_T3 := Color("#e83f6f")
 const FLAG := Color("#ffd25e")
 const EXTRACT := Color("#55e08a")
 
+const ELECTRO := Color("#9ad7ff")
+const BIO := Color("#7dc873")
+const STAMINA := Color("#ffb24d")
+const ARCANE := Color("#b07ae8")
+
 const HP := Color("#5ee87a")
 const HP_ENEMY := Color("#e85e5e")
 const BAR_BG := Color("#20242e")

@@ -20,15 +20,44 @@ Dois esquemas — **F1 alterna em jogo**:
 | Mover | WASD | Botão direito (segurar anda continuamente) |
 | Skills | Q / E / R / F | Q / W / E / R |
 
-Em ambos os esquemas:
+No início da partida, escolha a classe com **[1]**, **[2]** ou **[3]**.
+
+**[1] ATIRADOR** — skills usam **energia** (barra azul, regenera sozinha):
+
+| Input | Ação | Custo |
+|---|---|---|
+| Clique esquerdo | Pistola laser (ataque básico, sempre disponível) | — |
+| Skill 1 | Dash — seta indica a direção e distância do avanço | 20 |
+| Skill 2 | Raio elétrico — atravessa inimigos, dano + lentidão 50%/2.5s | 30 |
+| Skill 3 | Pulso repulsor — sem dano; empurra e interrompe a investida | 25 |
+| Skill 4 | Explosão carregada — **segure para carregar** (drena energia, você anda devagar), solte para explodir; dano e raio escalam com a carga | 30+ |
+
+**[2] DUELISTA** — skills usam **fôlego** (barra âmbar, **não regenera
+sozinho**: carrega acertando golpes — agressão alimenta o kit):
+
+| Input | Ação | Custo |
+|---|---|---|
+| Clique esquerdo | Combo de lâmina 1-2-3 — o 3º golpe é finisher (1.5x) | gera fôlego |
+| Skill 1 | Avanço cortante — dash curto que golpeia ao chegar; **abater reseta o cooldown** | 15 |
+| Skill 2 | Aparar (instantâneo) — postura de 0.75s que bloqueia todo dano; bloquear **atordoa** inimigos próximos | 20 |
+| Skill 3 | Gancho de tração — projétil que **puxa** o inimigo até você | 25 |
+| Skill 4 | Execução — golpe pesado que consome TODO o fôlego; dano escala com o fôlego e com o HP faltante do alvo | 30+ |
+
+**[3] MAGO** — 75 HP; skills usam **fluxo** (barra roxa, regenera **só
+parado** — posicionamento é tudo):
+
+| Input | Ação | Custo |
+|---|---|---|
+| Clique esquerdo | Orbe arcano — mais lento, mas **atravessa** inimigos | — |
+| Skill 1 | Sentinela — torreta autônoma no chão (máx. 2, dura 10s) | 30 |
+| Skill 2 | Campo gravitacional — zona de lentidão de 70% por 3.5s | 30 |
+| Skill 3 | Translocar — teleporte instantâneo curto | 25 |
+| Skill 4 | Cataclismo — marca um círculo que **detona após 1s**; os guardiões tentam escapar (prenda-os com o campo!) | 40 |
+
+Em todas as classes:
 
 | Input | Ação |
 |---|---|
-| Clique esquerdo | Ataque básico (na direção do cursor, sempre disponível) |
-| Skill 1 | Skillshot em linha |
-| Skill 2 | Dash na direção do cursor |
-| Skill 3 | Nova — dano em área ao redor do personagem |
-| Skill 4 | Explosão em área mirada no chão |
 | Esc (e clique direito no esquema WASD) | Cancelar mira de skill |
 | R (após vitória) | Reiniciar |
 
@@ -40,8 +69,15 @@ Segurar a tecla da skill mostra o spell indicator; soltar lança na direção
 do cursor. O minimapa (canto superior direito) mostra bandeiras, inimigos
 e a zona de extração.
 
+Os guardiões **leem a sua mira**: segurar um indicador apontado para eles
+provoca esquiva — use a mira como finta ou lance rápido.
+
 ## Objetivo
 
 Capture as 3 bandeiras (fique dentro do anel dourado) — cada uma é guardada
-por um camp de inimigos mais forte que o anterior. A terceira bandeira vence
-a partida. Inimigos dão XP; subir de nível aumenta HP e dano.
+por um GUARDIÃO, mais forte a cada tier. Há dois tipos: o **atirador**
+(orbita você disparando rajadas, recua se você cola) e o **ceifador**
+(corpo a corpo: persegue acelerando, fecha distância com investida, combo
+de 3 golpes com finisher e um rodopio devastador telegrafado — saia do
+círculo!). A terceira bandeira vence a partida. Guardiões dão XP; subir de
+nível aumenta HP e dano.

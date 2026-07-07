@@ -25,6 +25,9 @@ func _process(delta: float) -> void:
 			ready_flash[i] = maxf(0.0, ready_flash[i] - delta)
 	queue_redraw()
 
+func has_player() -> bool:
+	return player != null and is_instance_valid(player)
+
 func _find_player() -> void:
 	var nodes := get_tree().get_nodes_in_group("player")
 	if not nodes.is_empty():
@@ -50,9 +53,16 @@ func _draw() -> void:
 	draw_string(font, Vector2(bx, by + bh - 3.0), " %d / %d" % [player.hp, player.max_hp],
 		HORIZONTAL_ALIGNMENT_CENTER, bw, 12, Color(0.0, 0.0, 0.0, 0.8))
 
+	# --- barra de recurso (energia/fôlego — cor da classe) ---
+	var eh := 9.0
+	var ey := by + bh + 5.0
+	draw_rect(Rect2(bx, ey, bw, eh), Palette.BAR_BG)
+	draw_rect(Rect2(bx, ey, bw * clampf(player.energy / player.MAX_ENERGY, 0.0, 1.0), eh),
+		player.resource_color())
+
 	# --- barra de XP + nível ---
-	var xh := 6.0
-	var xy := by + bh + 5.0
+	var xh := 5.0
+	var xy := ey + eh + 4.0
 	draw_rect(Rect2(bx, xy, bw, xh), Palette.BAR_BG)
 	draw_rect(Rect2(bx, xy, bw * clampf(player.xp / player.xp_to_next(), 0.0, 1.0), xh), Palette.XP)
 	draw_string(font, Vector2(bx - 64.0, by + bh - 2.0), "Nv %d" % player.level,
@@ -62,7 +72,8 @@ func _draw() -> void:
 	var labels: Array = player.skill_labels()
 	for i in 4:
 		_draw_skill(Vector2(bx + bw + 16.0 + i * (SLOT + 8.0), by - 18.0),
-			labels[i], player.cds[i], player.COOLDOWNS[i], ready_flash[i], font)
+			labels[i], player.cds[i], player.cooldowns[i], ready_flash[i],
+			player.can_pay(i), font)
 
 	# --- bandeiras (topo centro) ---
 	var total := Game.FLAGS_TOTAL
@@ -85,7 +96,7 @@ func _draw() -> void:
 	if Game.scheme == Game.Scheme.MOUSE:
 		scheme_txt = "Mouse (clique dir. move) + QWER"
 	draw_string(font, Vector2(14.0, vp.y - 16.0),
-		"Controles: %s   [F1 alterna]" % scheme_txt,
+		"%s — Controles: %s   [F1 alterna]" % [player.class_title(), scheme_txt],
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(Palette.WHITE, 0.5))
 
 	# --- overlays ---
@@ -101,10 +112,16 @@ func _draw() -> void:
 			HORIZONTAL_ALIGNMENT_CENTER, vp.x, 26, Palette.WHITE)
 
 func _draw_skill(pos: Vector2, key: String, cd: float, cd_max: float,
-		flash: float, font: Font) -> void:
+		flash: float, affordable: bool, font: Font) -> void:
 	var s := SLOT
 	draw_rect(Rect2(pos, Vector2(s, s)), Palette.BAR_BG)
-	if cd > 0.0:
+	if cd <= 0.0 and not affordable:
+		# pronta mas sem energia: apagada com a tecla em azul fraco
+		draw_rect(Rect2(pos, Vector2(s, s)), Color(0.0, 0.0, 0.0, 0.55))
+		draw_string(font, Vector2(pos.x, pos.y + s / 2.0 + 8.0), key,
+			HORIZONTAL_ALIGNMENT_CENTER, s, 22, Color(Palette.PLAYER, 0.45))
+		draw_rect(Rect2(pos, Vector2(s, s)), Color(Palette.PLAYER, 0.2), false, 2.0)
+	elif cd > 0.0:
 		var frac := cd / cd_max
 		# sombra esvaziando de cima pra baixo + contagem central
 		draw_rect(Rect2(pos, Vector2(s, s * frac)), Color(0.0, 0.0, 0.0, 0.65))
@@ -134,6 +151,10 @@ func _draw_minimap(vp: Vector2) -> void:
 	draw_rect(map_rect, Color(0.0, 0.0, 0.0, 0.45))
 	draw_rect(map_rect, Palette.WALL, false, 2.0)
 
+	for node in get_tree().get_nodes_in_group("obstacles"):
+		var wrect: Rect2 = node.map_rect()
+		var wcol: Color = node.map_color()
+		draw_rect(Rect2(origin + (wrect.position - arena.position) * sc, wrect.size * sc), wcol)
 	for node in get_tree().get_nodes_in_group("flags"):
 		var f := node as Flag
 		var col := Palette.FLAG if not f.captured else Color(Palette.FLAG, 0.25)

@@ -12,24 +12,52 @@ const RESPAWN_DELAY := 2.5
 
 var player: Player
 var respawn_timer := 0.0
+var lobby_cam: Camera2D
 
 func _ready() -> void:
 	Game.reset()
 	Game.arena = ARENA
 	_build_walls()
 
-	player = Player.new()
-	player.position = SPAWN
-	player.died.connect(_on_player_died)
-	add_child(player)
-
-	_spawn_camp(Vector2(2350.0, 2300.0), 1, 3)
-	_spawn_camp(Vector2(800.0, 1400.0), 2, 4)
-	_spawn_camp(Vector2(2400.0, 650.0), 3, 5)
+	_spawn_camp(Vector2(2350.0, 2300.0), 1, true)   # ceifador (melee)
+	_spawn_camp(Vector2(800.0, 1400.0), 2, false)   # atirador
+	_spawn_camp(Vector2(2400.0, 650.0), 3, true)    # ceifador elite
 
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	layer.add_child(HUD.new())
+	var select := ClassSelect.new()
+	layer.add_child(select)
+	select.chosen.connect(_start_match)
+
+	# câmera provisória no spawn até a escolha da classe
+	lobby_cam = Camera2D.new()
+	lobby_cam.position = SPAWN
+	add_child(lobby_cam)
+	lobby_cam.make_current()
+
+	# atalho p/ testes headless: godot --path . ++ --class=1|2|3
+	var args := OS.get_cmdline_user_args()
+	for i in 3:
+		if args.has("--class=%d" % (i + 1)):
+			select.queue_free()
+			_start_match(i)
+			break
+
+func _start_match(cls: int) -> void:
+	if cls == 1:
+		player = DuelistPlayer.new()
+	elif cls == 2:
+		player = MagePlayer.new()
+	else:
+		player = Player.new()
+	player.position = SPAWN
+	player.died.connect(_on_player_died)
+	add_child(player)
+	player.camera.make_current()
+	if lobby_cam != null:
+		lobby_cam.queue_free()
+		lobby_cam = null
 
 func _build_walls() -> void:
 	var t := 60.0
@@ -48,7 +76,8 @@ func _wall(rect: Rect2) -> void:
 	body.add_child(shape)
 	add_child(body)
 
-func _spawn_camp(pos: Vector2, tier: int, count: int) -> void:
+## Um camp = território + bandeira + UM guardião (melee ou atirador).
+func _spawn_camp(pos: Vector2, tier: int, melee: bool) -> void:
 	var tier_colors: Array[Color] = [Palette.ENEMY_T1, Palette.ENEMY_T2, Palette.ENEMY_T3]
 	var territory := CampTerritory.new()
 	territory.setup(pos, Enemy.TERRITORY, tier_colors[tier - 1])
@@ -56,19 +85,16 @@ func _spawn_camp(pos: Vector2, tier: int, count: int) -> void:
 	var flag := Flag.new()
 	flag.position = pos
 	add_child(flag)
-	for i in count:
-		var e := Enemy.new(tier)
-		e.camp_center = pos
-		e.is_ranged = i % 2 == 1
-		var a := TAU * i / count
-		e.position = pos + Vector2.from_angle(a) * 150.0
-		add_child(e)
+	var guardian: Enemy = MeleeEnemy.new(tier) if melee else Enemy.new(tier)
+	guardian.camp_center = pos
+	guardian.position = pos + Vector2(0.0, -140.0)
+	add_child(guardian)
 
 func _on_player_died() -> void:
 	respawn_timer = RESPAWN_DELAY
 
 func _process(delta: float) -> void:
-	if respawn_timer > 0.0:
+	if player != null and respawn_timer > 0.0:
 		respawn_timer -= delta
 		if respawn_timer <= 0.0:
 			player.respawn(SPAWN)
